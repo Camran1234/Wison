@@ -11,7 +11,7 @@
 ["/"]["*"][^*]*[*]+([^/*][^*]*["*"]+)*["/"]	/*Ignore */
 
 /*[0-9]+("."[0-9]+)?\b  return 'NUMBER'*/
-"[aA-zZ]"               return 'ALLLETTERS'
+"[aA-zZ]"               return 'ALLLETTERS' 
 "[0-9]"                 return 'ALLNUMBERS'
 "{"                   return '{'
 "}"                   return '}'
@@ -42,11 +42,8 @@
 "%_"[^ )\s;<-]+            return 'NOTERMINAL'
 "\"[a-z]                return 'ALFANUM'
 
-
-/*Reserver Word for Syntax Block*/
-
-
 <<EOF>>               return 'EOF'
+.*                  return 'ERROR';
 
 /lex
     %left '('
@@ -56,14 +53,18 @@
     %%/* language grammar */
 
         s 
-            : WISON '¿' p '?' WISON EOF
+            : WISON '¿' p 
+            |error p
             ;
         p
             : LEX '{' ':' t y
+            |error t y
             ;
 
         y   
-            : SYNTAX '{' '{' ':' sy ;
+            : SYNTAX '{' '{' ':' sy
+            |error sy
+             ;
 
         t   : er ':' '}'
             ;
@@ -72,11 +73,13 @@
             ;
         
         var_re  :   var var_re
+                    |error var_re
                     |/*EMPTY*/;
 
         var : TERMINALINIT TERMINAL '<' '-' expresion_re ;
 
-        expresion_re : expresion ';';
+        expresion_re : expresion ';'
+                    |error expresion ';';
 
         expresion : '(' expresion ')' fer expresion
                     | '[' expresion ']' fer expresion
@@ -91,10 +94,19 @@
              | '?'
              | /*EMPTY*/;
         
-        sy : not_re ':' '}' '}' ;
+        sy : not_re ':' '}' '}' '?' WISON EOF
+            |not_re ':' error EOF
+            |not_re ':' '}' error  EOF
+            |not_re ':' '}' '}' '?' error EOF
+            |not_re ':' '}' '}' error EOF
+            |error EOF
+            ;
 
         not_re : not not_re
-                |ini;
+                | ini
+                |error not not_re
+                |error vars_re
+                ;
 
         not : NOTERMINALINIT NOTERMINAL ';' ;
 
@@ -103,14 +115,16 @@
         vars_re : vars vars_re
                 |/*EMPTY*/;
 
-        vars : NOTERMINAL '<' '=' ef;
+        vars : NOTERMINAL '<' '=' ef
+             |error ef;
 
         ef : proc ef_re;
         
         ef_re : '|' proc ef_re
             | ';' ;
 
-        proc : proc_re;
+        proc : proc_re
+                |error ef_re;
 
         proc_re : n proc_re
                 | /*EMPTY*/;
