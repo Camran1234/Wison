@@ -18,11 +18,16 @@ import * as parserWison from '../assets/parser/Wison.js';
   }
 
   parseWinson(){
-    var parser = parserWison
+    var parser = parserWison.parser
     console.log("Code to parse")
     
     parser.parse(this.text)
-    
+    // var tokens = parser.getTokensName();
+    // var lexemes = parser.getLexemesName();
+    // console.log("Tokens: "+tokens.length+" Lexemes: "+lexemes.length);
+
+   
+
   }
 
   getLineNumberAndColumnIndex(textarea:any){

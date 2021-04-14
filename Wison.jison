@@ -2,7 +2,10 @@
 
     
 %{
-    
+  console.log("Hero goes the extra code");  
+  import symbolTable from '../parser/symbolTable'
+  let re = new re();
+  
 %}
 
 %lex
@@ -47,7 +50,7 @@
 "\"[a-z]                return 'ALFANUM'
 
 <<EOF>>               return 'EOF'
-.                  return 'INVALID';
+.                  return 'INVALID'; 
 
 /lex
 
@@ -56,49 +59,49 @@
     %%/* language grammar */
 
         s 
-            : WISON '¿' p { $$ = ''; console.log("start"); }
+            : WISON '¿' p { console.log("s"); }
             |error p
             ;
         p
-            : LEX '{' ':' t y
+            : LEX '{' ':' t y { console.log("p"); }
             |error t y
             ;
 
         y   
-            : SYNTAX '{' '{' ':' sy
+            : SYNTAX '{' '{' ':' sy { console.log("y"); }
             |error sy
              ;
 
-        t   : er ':' '}'
+        t   : er ':' '}' { console.log("t"); }
             ;
 
-        er  : var_re
+        er  : var_re { console.log("er"); }
             ;
         
-        var_re  :    var var_re
+        var_re  :    var var_re { console.log("var_re"); }
                     |/*EMPTY*/;
 
-        var : TERMINALINIT TERMINAL '<' '-' expresion_re 
+        var : TERMINALINIT TERMINAL '<' '-' expresion_re { console.log("var"); re.addTokenTerminal($2); re.addLexemeTerminal($5); re.resetTerminal(); }
             |error expresion_re;
 
-        expresion_re : expresion ';'
+        expresion_re : expresion ';' { console.log("expresion_re");}
                     |expresion error 
                     ;
 
-        expresion : '(' expresion ')' fer expresion
-                    | '[' expresion ']' fer expresion
-                    | '('TERMINAL')' expresion
-                    | ALLNUMBERS fer expresion
-                    | ALLLETTERS fer expresion
-                    | RESERVED_WORD expresion
-                    | ALFANUM expresion
+        expresion : '(' expresion ')' fer expresion { console.log("1expresion"); $$ = [$1,$2,$3,$4,$5].join(' '); }
+                    | '[' expresion ']' fer expresion  { console.log("2expresion"); $$ = [$1,$2,$3,$4,$5].join(' '); }
+                    | '('TERMINAL')' expresion { console.log("3expresion"); $$ = [$1,$2,$3,$4].join(' '); }
+                    | ALLNUMBERS fer expresion { console.log("4expresion"); $$ = [$1,$2,$3].join(' ');}
+                    | ALLLETTERS fer expresion { console.log("5expresion"); $$ = [$1,$2,$3].join(' ');}
+                    | RESERVED_WORD expresion { console.log("6expresion"); $$ = [$1,$2].join(' '); }
+                    | ALFANUM expresion { console.log("7expresion"); $$ = [$1,$2].join(' '); }
                     | ;
-        fer : '*'
-             |'+'
-             | '?'
-             | /*EMPTY*/;
+        fer : '*' {$$=$1;}
+             |'+' {$$=$1;}
+             | '?' {$$=$1;}
+             | /*EMPTY*/; 
         
-        sy : not_re  ini ':' '}' '}' '?' WISON EOF
+        sy : not_re  ini ':' '}' '}' '?' WISON EOF { console.log("sy"); }
             |not_re  ini ':' error EOF
             |not_re  ini ':' '}' error  EOF
             |not_re  ini ':' '}' '}' '?' error EOF
@@ -107,37 +110,37 @@
             |error EOF
             ;
 
-        not_re : not not_re
+        not_re : not not_re { console.log("not_re"); }
                 |error not not_re
                 |error vars_re
                 ;
 
-        not : NOTERMINALINIT NOTERMINAL ';' ;
+        not : NOTERMINALINIT NOTERMINAL ';'  { console.log("not"); re.addNoTerminalDeclarate($2); };
 
-        ini : INIT NOTERMINAL ';' vars_re;
+        ini : INIT NOTERMINAL ';' vars_re{ console.log("ini"); } ;
 
-        vars_re : vars vars_re
-                |/*EMPTY*/
+        vars_re : vars vars_re { console.log("vars_re"); }
+                |/*EMPTY*/ 
                 |error vars_re;
 
-        vars : NOTERMINAL '<' '=' ef ';'
+        vars : NOTERMINAL '<' '=' ef ';' { console.log("vars"); re.addProductionName($1); re.resetNoTerminal(); }
              ;
 
-        ef : proc ef_re 
+        ef : proc ef_re { console.log("ef"); re.addNewRule($1);}
         ;
         
-        ef_re : '|' proc ef_re
+        ef_re : '|' proc ef_re { console.log("ef_re"); re.addNewRule($2);}
             | 
              ;
 
-        proc : proc_re
+        proc : proc_re { console.log("proc"); }
                 |error ef_re;
 
-        proc_re : n proc_re
+        proc_re : n proc_re { console.log("proc_re"); }
                 | /*EMPTY*/;
 
-        n : TERMINAL
-            |NOTERMINAL;
+        n : TERMINAL { console.log("n"); $$=$1;}
+            |NOTERMINAL { console.log("n"); $$=$1;};
 
 
 

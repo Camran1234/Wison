@@ -1,6 +1,4 @@
-class NoTerminal {
-    production = ""
-    rules = new Array()
+export default class NoTerminal {
 
     //production es el nombre de la produccion
     //rules es el conjunto de reglas un array de string

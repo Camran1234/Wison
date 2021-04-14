@@ -1,9 +1,16 @@
-class Terminal{
-    token = ""
-    lexeme = ""
+export default class Terminal{
+
     constructor (){
-        this.token = ""
-        this.lexeme = lexeme
+        this.token = "";
+        this.lexeme = "";
+    }
+
+    setToken(newToken){
+        this.token = newToken
+    }
+
+    setLexeme(newLexeme){
+        this.lexeme = newLexeme
     }
 
     getToken(){
