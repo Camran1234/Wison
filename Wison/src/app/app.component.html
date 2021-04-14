@@ -1,10 +1,22 @@
 <h1 style="text-align: center;" >WISON</h1>
-<h2>{{text}} Details</h2>
+<h2>Input Wison:</h2>
 <main>
-  <label for="text">Hero name: </label>
-  <div>
-    <textarea id="text" cols="40" rows="5" [(ngModel)]="text"></textarea>
-    <button (click)="realizarAccion()">Aceptar</button>
+  
+  <div class="container">
+    <div class="modal-dialog" >
+      <label for="text" >{{line}}</label>
+    </div>
+    <textarea matInput id="text" #myTextArea (click)="getLineNumberAndColumnIndex(myTextArea)"  (keyup)="getLineNumberAndColumnIndex(myTextArea)" (keyup)="getLineNumberAndColumnIndex(myTextArea)"  cols="100" rows="20" [(ngModel)]="text"></textarea>
+    
+    
+    <div class="example-button-row">
+      <button mat-raised-button color="primary">Abrir</button>
+      <button mat-raised-button color="accent" (click)="parseWinson()" >Run</button>
+    </div>
+    <h2 >OutPut</h2>
+    <textarea id="newText" matInput cols="100" rows="20">{{outPut}}</textarea>
   </div>
   
+  
 </main>
+

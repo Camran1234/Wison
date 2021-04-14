@@ -1,33 +1,37 @@
   /* description: Parses end evaluates mathematical expressions. */
 
     
+%{
+    
+%}
+
 %lex
 %%
 \s+                   /* skip whitespace */
-"Syntax"            return 'SYNTAX'
-"Initial_Sim"       return 'INIT'
-"No_Terminal"       return 'NOTERMINALINIT'
+"Syntax"            return ''+'SYNTAX'
+"Initial_Sim"       return ''+'INIT'
+"No_Terminal"       return ''+'NOTERMINALINIT'
 "#".*              /*Ignore */
 ["/"]["*"][^*]*[*]+([^/*][^*]*["*"]+)*["/"]	/*Ignore */
 
-/*[0-9]+("."[0-9]+)?\b  return 'NUMBER'*/
-"[aA-zZ]"               return 'ALLLETTERS' 
-"[0-9]"                 return 'ALLNUMBERS'
-"{"                   return '{'
-"}"                   return '}'
-"["                   return '['
-"]"                   return ']'
-"("                   return '('
-")"                   return ')'
-"<"                  return '<'
-"="                  return '='
-"-"                  return '-'
-";"                  return ';'
-":"                  return ':'
-"+"                  return '+'
-"*"                  return '*'
-"?"                  return '?'
-"|"                 return '|'
+/*[0-9]+("."[0-9]+)?\b  return ''+'NUMBER'*/
+"[aA-zZ]"               return ''+'ALLLETTERS' 
+"[0-9]"                 return ''+'ALLNUMBERS'
+"{"                   return ''+'{'
+"}"                   return ''+'}'
+"["                   return ''+'['
+"]"                   return ''+']'
+"("                   return ''+'('
+")"                   return ''+')'
+"<"                  return ''+'<'
+"="                  return ''+'='
+"-"                  return ''+'-'
+";"                  return ''+';'
+":"                  return ''+':'
+"+"                  return ''+'+'
+"*"                  return ''+'*'
+"?"                  return ''+'?'
+"|"                 return ''+'|'
 
 /*Commentary Types*/
         
@@ -43,17 +47,16 @@
 "\"[a-z]                return 'ALFANUM'
 
 <<EOF>>               return 'EOF'
-.*                  return 'ERROR';
+.                  return 'INVALID';
 
 /lex
-    %left '('
 
     %start s
 
     %%/* language grammar */
 
         s 
-            : WISON '¿' p 
+            : WISON '¿' p { $$ = ''; console.log("start"); }
             |error p
             ;
         p
@@ -72,14 +75,15 @@
         er  : var_re
             ;
         
-        var_re  :   var var_re
-                    |error var_re
+        var_re  :    var var_re
                     |/*EMPTY*/;
 
-        var : TERMINALINIT TERMINAL '<' '-' expresion_re ;
+        var : TERMINALINIT TERMINAL '<' '-' expresion_re 
+            |error expresion_re;
 
         expresion_re : expresion ';'
-                    |error expresion ';';
+                    |expresion error 
+                    ;
 
         expresion : '(' expresion ')' fer expresion
                     | '[' expresion ']' fer expresion
@@ -94,16 +98,16 @@
              | '?'
              | /*EMPTY*/;
         
-        sy : not_re ':' '}' '}' '?' WISON EOF
-            |not_re ':' error EOF
-            |not_re ':' '}' error  EOF
-            |not_re ':' '}' '}' '?' error EOF
-            |not_re ':' '}' '}' error EOF
+        sy : not_re  ini ':' '}' '}' '?' WISON EOF
+            |not_re  ini ':' error EOF
+            |not_re  ini ':' '}' error  EOF
+            |not_re  ini ':' '}' '}' '?' error EOF
+            |not_re  ini ':' '}' '}' error EOF
+            |error ':' '}' '}' error EOF
             |error EOF
             ;
 
         not_re : not not_re
-                | ini
                 |error not not_re
                 |error vars_re
                 ;
@@ -113,15 +117,18 @@
         ini : INIT NOTERMINAL ';' vars_re;
 
         vars_re : vars vars_re
-                |/*EMPTY*/;
+                |/*EMPTY*/
+                |error vars_re;
 
-        vars : NOTERMINAL '<' '=' ef
-             |error ef;
+        vars : NOTERMINAL '<' '=' ef ';'
+             ;
 
-        ef : proc ef_re;
+        ef : proc ef_re 
+        ;
         
         ef_re : '|' proc ef_re
-            | ';' ;
+            | 
+             ;
 
         proc : proc_re
                 |error ef_re;
