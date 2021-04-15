@@ -1,5 +1,7 @@
 import Terminal from './Teminal'
 import NoTerminal from './NoTerminal'
+import Error from './Error'
+import ContainParsers from './ContainParsers'
 
 export default class SymbolTable{
 
@@ -7,12 +9,186 @@ export default class SymbolTable{
         this.terminales = new Array()
         this.noterminales = new Array()
         this.declaredNoterminales = new Array()
+        this.iniciador = ""
         this.terminalAux = new Terminal()
         this.noTerminalAux = new NoTerminal()
+        this.answer = "Leyendo Archivo\n"
+        this.erroresLexicos = new Array()
+        this.erroresSintacticos = new Array()
+        this.leftRecursed = new Array()
+        this.parsers = new ContainParsers()
     }
 
-    customer(){
-        return new Customer();
+    getNamesParsers(){
+        return this.parsers
+    }
+
+    generateParser(){
+        
+    }
+
+    reset(){
+        this.terminales = new Array()
+        this.noterminales = new Array()
+        this.declaredNoterminales = new Array()
+        this.iniciador = ""
+        this.terminalAux = new Terminal()
+        this.noTerminalAux = new NoTerminal()
+        this.answer = "Leyendo Archivo\n"
+        this.erroresLexicos = new Array()
+        this.erroresSintacticos = new Array()
+        this.leftRecursed = new Array()
+    }
+
+    tokenInitialiaze(token){
+        this.iniciador = token
+    }
+
+    checkLexicLexemes(){
+        //Si es verdadero ir a parsear
+        var result = true
+            for(var index=0; index<this.terminales.length; index++){
+                var flag = this.terminales[index].checkLexeme(this.terminales)
+                if(flag){
+                    this.answer+= this.terminales[index].getMessage()
+                    result = false;
+                }
+            }
+        return result
+    }
+
+    checkSyntaxRules(){
+        //Si es verdadero ir a parser
+        var result = true
+            for(var index=0; index<this.noterminales.length; index++){
+                var flag = this.noterminales[index].checkSyntax(this.noterminales, this.terminales)
+                if(flag){
+                    this.answer += this.noterminales[index].getMessage()
+                    result = false
+                }
+            }
+        return result
+    }
+
+
+
+    checkFactorize(){
+        var result = true
+        for(var index=0; index<this.noterminales.length; index++){
+            var flag = this.noterminales[index].factorize()
+            if(flag){
+                this.answer += "Se detecto que se puede factorizar en la produccion: "+this.noterminales[index].getProduction()+"\n"
+                result = false
+            }
+        }
+
+        var result
+    }
+
+    checkLeftRecursion(){
+        var result = true
+        
+        for(var index=0; index<this.noterminales.length; index++){
+            var flag = this.noterminales[index].checkLeftRecursion();
+            if(flag == true){
+                this.answer += "Se detecto recursividad en la izquierda en la produccion: "+this.noterminales[index].getProduction()+"\n"
+                result = false;
+            }
+        }
+        return result
+    }
+
+    checkIfNotDeclareted(){
+        var result = true
+        var declaredNoterminales = this.declaredNoterminales
+        var noTerminales = this.noterminales
+        var indexDeclared =0
+        var indexNoTerminales =0
+        var founded = false
+
+            
+            for(indexNoTerminales=0; indexNoTerminales<noTerminales.length; indexNoTerminales++){
+                founded=false
+                for(indexDeclared=0; indexDeclared<declaredNoterminales.length;indexDeclared++){
+                    var nameDeclared = declaredNoterminales[indexDeclared]
+                    var compareProduction = noTerminales[indexNoTerminales].getProduction()
+                    var result = nameDeclared.toString().localeCompare(compareProduction.toString())
+                    if(result == 0){
+                        if(founded==false){
+                            console.log(compareProduction+indexNoTerminales)
+                            founded=true
+                        }else{
+                            this.answer += "ERROR: La produccion: "+compareProduction+" se produjo más de una vez \n"
+                            result = false;
+                            break;
+                        }
+                    }
+                    if(founded ==false && indexDeclared == (declaredNoterminales.length-1)){
+                        this.answer += "ERROR: La produccion: "+compareProduction+" no existe\n"
+                        founded=true
+                        result = false
+                    }
+                }
+                if(founded==false){
+                    this.answer += "WARNING: El No Terminal "+noTerminales[indexNoTerminales]+" no se uso en ningun momento\n"
+                }
+            }
+            if(noTerminales.length< declaredNoterminales.length){
+                for(indexDeclared=0; indexDeclared<declaredNoterminales.length; indexDeclared++){
+                    founded=false
+                    for(indexNoTerminales=0; indexNoTerminales<noTerminales.length;indexNoTerminales++){
+                        var nameDeclared = declaredNoterminales[indexDeclared]
+                        var compareProduction = noTerminales[indexNoTerminales].getProduction()
+                        var result = nameDeclared.toString().localeCompare(compareProduction.toString())
+                        if(result == 0){
+                            if(founded==false){
+                                founded=true
+                            }
+                        }
+                    }
+                    if(founded==false){
+                        this.answer += "WARNING: El No Terminal "+declaredNoterminales[indexDeclared]+" no se uso en ningun momento\n"
+                    }
+                }
+            }
+
+        return result
+    }
+
+    /**
+     * Description of the output
+     */
+    getAnswer(){
+        if(this.erroresLexicos.length==0 && this.erroresSintacticos.length==0){
+            return this.answer
+        }else{
+            for(var index=0; index<this.erroresLexicos.length; index++){
+                this.answer += this.erroresLexicos[index].getMessage();
+            }
+            for(var index=0; index<this.erroresSintacticos.length; index++){
+                this.answer += this.erroresSintacticos[index].getMessage();
+            }
+            return this.answer
+        }
+        
+    }
+
+    haveErrors(){
+        if(this.erroresLexicos.length==0 && this.erroresSintacticos.length==0){
+            return false
+        }else{
+            return true
+        }
+    }
+
+    addErrorSintactico(descripcion, linea, columna){
+        let error = new Error(descripcion, linea, columna)
+        this.erroresSintacticos.push(error)
+    }
+
+    addErrorLexico(descripcion, linea, columna){
+        let error = new Error(descripcion, linea, columna)
+        this.erroresLexicos.push(error)
     }
 
     addNoTerminalDeclarate(noTerminal){

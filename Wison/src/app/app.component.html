@@ -10,9 +10,10 @@
     
     
     <div class="example-button-row">
-      <button mat-raised-button color="primary">Abrir</button>
-      <button mat-raised-button color="accent" (click)="parseWinson()" >Run</button>
       
+          <input type="file" id='fileForm' #fileArea (change)="fileUpload(fileArea)"  placeholder="Abrir">
+        
+      <button mat-raised-button color="accent" (click)="parseWinson()" >Run</button>      
     </div>
     <h2 >OutPut</h2>
     <textarea id="newText" matInput cols="100" rows="20">{{outPut}}</textarea>

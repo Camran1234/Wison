@@ -5,6 +5,7 @@ export default class NoTerminal {
     constructor (){
         this.production = "";
         this.rules = new Array();
+        this.message ="";
     }
 
     setProduction(nameProduction){
@@ -13,18 +14,20 @@ export default class NoTerminal {
 
     //Agrega una nueva regla
     setNewRule(newRule){
+            
         this.rules.push(newRule)
     }   
 
     //Retorna verdadero si es recursiva por la izquierda
     //Retorna falso si no es recursiva por la izquierda
-    checkLeftRecursion(production, rules){
-        if(rules.length>1){
+    checkLeftRecursion(){
+        if(this.rules.length>1){
             var size;
-            for(size=0; size<rules.length; size++){
-                var rule = rules[size]
+            for(size=0; size<this.rules.length; size++){
+                var rule = this.rules[size].toString()
                 var res = rule.split(" ")
-                if(res[0].localCompare(production)){
+                if(res[0].localeCompare(this.production)==0){
+                    
                     return true
                 }
             }
@@ -33,18 +36,19 @@ export default class NoTerminal {
     }
 
     //retorna verdadero si se puede factorizar 
-    factorize(production, rules){
-        if(rules.length>1){
+    factorize(){
+        if(this.rules.length>1){
             var size;
-            var rule = rules[0]
-            var res = rule.split("")
+            var rule = this.rules[0]
+            var res = rule.split(" ")
             var terminal = res[0];
             var compareterminal = "";
-            for(size=1; size<rules.length; size++){
-                rule = rules[size]
-                res = rules[size]
+            for(size=1; size<this.rules.length; size++){
+                rule = this.rules[size]
+                res = this.rules[size]
                 compareterminal = res[0]
-                if(terminal.localCompare(compareterminal)==0){
+                if(terminal.localeCompare(compareterminal)==0){
+                    console.log("Comparando: "+terminal+" con: "+compareterminal)
                     return true
                 }
             }
@@ -52,8 +56,71 @@ export default class NoTerminal {
         return false
     }
 
+    checkSyntax(noterminales, terminales){
+        var result = false
+
+        for(var index=0; index<this.rules.length; index++){
+            var rule = this.rules[index].split(" ")
+            for(var indexRule=0; indexRule<rule.length; indexRule++){
+                var auxRule = rule[indexRule]        
+                var flagNoTerminal 
+                var flagTerminal
+                //Is Terminal
+                if(auxRule.includes("$_")){
+                    flagTerminal = this.helpTerminal(terminales, auxRule)
+                    if(flagTerminal==true){
+                        result = true
+                        this.message += "ANo se reconocio el Terminal"+auxRule+" en la produccion "+this.production+", dentro de sus reglas\n"
+                    }
+                    
+                }else if(auxRule.includes("%_")){
+                    //Is noTerminal
+                    flagNoTerminal = this.helpNoTerminal(noterminales, auxRule)
+                    if(flagNoTerminal==true){
+                        result = true
+                        this.message += "BNo se reconocio el NoTerminal "+auxRule+" en la produccion "+this.production+", dentro de sus reglas\n"
+                    }
+                }
+            }
+        }
+
+        return result
+    }
+
+    /**
+     * Return false if it does exist the production and is equal to the name
+     * @param {} noterminales 
+     * @param {*} name 
+     * @returns 
+     */
+    helpNoTerminal(noterminales, name){
+        var result = true
+        for(var index=0; index<noterminales.length; index++){
+
+            if(noterminales[index].getProduction().toString().localeCompare(name)==0){
+                return false
+            }
+        }
+        return result
+    }
+
+    helpTerminal(terminales, name){
+        var result = true
+        
+        for(var index=0; index<terminales.length; index++){
+            if(terminales[index].getToken().toString().localeCompare(name)==0){
+                return false
+            }
+        }
+
+        return result
+    }
+
     getProduction(){
         return this.production;
+    }
+    getMessage(){
+        return this.message
     }
 
     getRules(){
