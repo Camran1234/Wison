@@ -9,6 +9,32 @@ p { color: #adb7bd; font-family: 'Lucida Sans', Arial, sans-serif; font-size: 16
 
 a { color: #fe921f; text-decoration: underline; }
 
+textarea{
+  outline: #2196F3;
+  outline-width: 20px;
+}
+
+.lineIndicator{
+  color : White;
+  padding: 6px;
+  font-family: Arial;
+  background-color: black;
+  font-size:large;
+}
+
+.open{
+  color: white;
+  padding: 8px;
+  font-family: Arial;
+  background-color: #2196F3
+}
+
+.warning{
+  color: white;
+  padding: 8px;
+  font-family: Arial;
+  background-color: #ff9800
+}
 
 a:hover { color: #ffffff }
 

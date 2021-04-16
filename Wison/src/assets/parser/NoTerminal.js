@@ -14,7 +14,6 @@ export default class NoTerminal {
 
     //Agrega una nueva regla
     setNewRule(newRule){
-            
         this.rules.push(newRule)
     }   
 
@@ -37,23 +36,26 @@ export default class NoTerminal {
 
     //retorna verdadero si se puede factorizar 
     factorize(){
+        var result = false
         if(this.rules.length>1){
             var size;
+            //This part is dummy
             var rule = this.rules[0]
             var res = rule.split(" ")
             var terminal = res[0];
             var compareterminal = "";
-            for(size=1; size<this.rules.length; size++){
-                rule = this.rules[size]
-                res = this.rules[size]
+            for(size=0; size<this.rules.length; size++){
+                rule = this.rules[size].toString()
+                res = rule.split(" ")
                 compareterminal = res[0]
                 if(terminal.localeCompare(compareterminal)==0){
-                    console.log("Comparando: "+terminal+" con: "+compareterminal)
-                    return true
+                    result = true
+                }else{
+                    return false
                 }
             }
         }
-        return false
+        return result
     }
 
     checkSyntax(noterminales, terminales){
@@ -70,7 +72,7 @@ export default class NoTerminal {
                     flagTerminal = this.helpTerminal(terminales, auxRule)
                     if(flagTerminal==true){
                         result = true
-                        this.message += "ANo se reconocio el Terminal"+auxRule+" en la produccion "+this.production+", dentro de sus reglas\n"
+                        this.message += "No se reconocio el Terminal"+auxRule+" en la produccion "+this.production+", dentro de sus reglas\n"
                     }
                     
                 }else if(auxRule.includes("%_")){
@@ -78,7 +80,7 @@ export default class NoTerminal {
                     flagNoTerminal = this.helpNoTerminal(noterminales, auxRule)
                     if(flagNoTerminal==true){
                         result = true
-                        this.message += "BNo se reconocio el NoTerminal "+auxRule+" en la produccion "+this.production+", dentro de sus reglas\n"
+                        this.message += "No se reconocio el NoTerminal "+auxRule+" en la produccion "+this.production+", dentro de sus reglas\n"
                     }
                 }
             }

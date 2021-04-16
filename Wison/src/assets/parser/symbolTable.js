@@ -2,7 +2,8 @@ import Terminal from './Teminal'
 import NoTerminal from './NoTerminal'
 import Error from './Error'
 import ContainParsers from './ContainParsers'
-
+import jison from 'jison'
+import Grammar from './Grammar'
 export default class SymbolTable{
 
     constructor(){
@@ -19,12 +20,93 @@ export default class SymbolTable{
         this.parsers = new ContainParsers()
     }
 
-    getNamesParsers(){
-        return this.parsers
+    /**
+     * Function to verify the entry text with the parser selected
+     * @param {*} entry 
+     * @param {*} parserName 
+     * @returns 
+     */
+    parseEntry(entry, parserName){
+        var answer = this.parsers.parse(entry,parserName)
+        return answer
     }
 
-    generateParser(){
-        
+    /**
+     * Get the name of the parsers
+     * @returns 
+     */
+    getParsers(){
+        return this.parsers.getNameParsers()
+    }
+
+    
+
+    
+    /**
+     * Create a Jison Code with the actual parameters of thisobject
+     * @returns 
+     */
+    createCode(){
+        var code = "";
+        code += "%lex\n";
+        code += "%%\n";
+        code += "\\s+    /*skip*/\n";
+        for(var index=0; index<this.terminales.length; index++){
+            code += this.terminales[index].getLexeme().replace(/\'/g,'"').replace(/\s/g,"") + "      " + "return '"+this.terminales[index].getToken().replace("$_","")+"'\n"
+        }
+        code += ".*     /*LEXIC ERROR*/\n";
+        code += "<<EOF>>    return 'EOF'\n";
+        code += "/lex\n";
+
+        code += "\t%start "+this.iniciador.replace(/%_/g,"")+"\n";
+        code+= "\t%%\n"
+        for(var index=0; index<this.noterminales.length; index++){
+            //Hero goes the production
+            code += this.noterminales[index].getProduction().replace(/%_/g,"")+"\n \t:"
+            var helperCode = this.noterminales[index].getRules();
+            for(var indexCode=0; indexCode<helperCode.length; indexCode++){
+                //Hero goes the rules
+                var lexeme = helperCode[indexCode].replace("|","").replace(/%_/g,"").replace(/\$_/g,"")
+                if(indexCode==0){
+                    code += lexeme + "\n"
+                }else{
+                    code += "| " + lexeme + "\n"
+                }
+            }
+            code += "\t;\n"
+        }
+
+        return code
+    }
+
+    /**
+     * Create and add a new Parser
+     * @param {*} code 
+     * @param {*} nameParser 
+     */
+    createParser(code,nameParser){
+        try {
+            var text = nameParser
+            if(text.localeCompare("")==0){
+                text = "defaultParser"+this.parsers.getSize()
+            }
+            console.log("Entrando createParser")
+            var Parser = require("jison").Parser;
+            var parser = new Parser(code);
+            this.parsers.setParser(parser,text)
+            alert("Se agrego tu gramatica: "+text)
+        // you can also use the parser directly from memory
+
+        // if(parser.parse("(abc+abc)FIN")){
+        //     console.log("ES VERDADERO LPTM")
+        // }
+        // // returns true
+
+        // parser.parse("adfe34bc zxg");
+// throws lexical error   
+        } catch (error) {
+            console.error(error)            
+        }
     }
 
     reset(){
@@ -81,8 +163,7 @@ export default class SymbolTable{
                 result = false
             }
         }
-
-        var result
+        return result
     }
 
     checkLeftRecursion(){
@@ -181,6 +262,12 @@ export default class SymbolTable{
         }
     }
 
+    /**
+     * Getters for the Grammar Windigo
+     * @param {*} descripcion 
+     * @param {*} linea 
+     * @param {*} columna 
+     */
     addErrorSintactico(descripcion, linea, columna){
         let error = new Error(descripcion, linea, columna)
         this.erroresSintacticos.push(error)

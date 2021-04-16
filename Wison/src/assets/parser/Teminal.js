@@ -44,8 +44,9 @@ export default class Terminal{
                         var nameTerminal = terminales[indexTerminales].getToken().toString()
                         var lexemeChange = terminales[indexTerminales].getLexeme().toString()
                         //Change the lexeme
-                        this.lexeme.replace(nameTerminal, lexemeChange);
-                        console.log("SE CAMBIO EL LEXEMA")
+                        console.log("LEXEMA ANTIGUO: "+nameTerminal+ ", LEXEMA "+this.lexeme)
+                        this.lexeme =this.lexeme.replace(nameTerminal, lexemeChange);
+                        console.log("LEXEMA NUEVO: "+lexemeChange+ ", LEXEMA "+this.lexeme)
                     }
                 }
             }
