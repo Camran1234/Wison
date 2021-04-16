@@ -2,7 +2,6 @@ import Terminal from './Teminal'
 import NoTerminal from './NoTerminal'
 import Error from './Error'
 import ContainParsers from './ContainParsers'
-import jison from 'jison'
 import Grammar from './Grammar'
 export default class SymbolTable{
 
@@ -26,8 +25,8 @@ export default class SymbolTable{
      * @param {*} parserName 
      * @returns 
      */
-    parseEntry(entry, parserName){
-        var answer = this.parsers.parse(entry,parserName)
+    async parseEntry(entry, parserName){
+        var answer = await this.parsers.parse(entry,parserName)
         return answer
     }
 
@@ -40,7 +39,9 @@ export default class SymbolTable{
     }
 
     
-
+    getTree(){
+        return this.parsers.getGraphCode()
+    }
     
     /**
      * Create a Jison Code with the actual parameters of thisobject
@@ -48,34 +49,72 @@ export default class SymbolTable{
      */
     createCode(){
         var code = "";
-        code += "%lex\n";
-        code += "%%\n";
-        code += "\\s+    /*skip*/\n";
+        code += "%{\n"
+        //Here we add our code
+        code += "%}\n"
+        code += "%lex\n"
+        code += "%%\n"
+        code += "\\s+    /*skip*/\n"
         for(var index=0; index<this.terminales.length; index++){
-            code += this.terminales[index].getLexeme().replace(/\'/g,'"').replace(/\s/g,"") + "      " + "return '"+this.terminales[index].getToken().replace("$_","")+"'\n"
+            code += this.terminales[index].getLexeme().replace(/\'/g,'"').replace(/\s/g,"") + "      " + "return '"+this.terminales[index].getToken().replace(/\$_/g,"T")+"'\n"
         }
         code += ".*     /*LEXIC ERROR*/\n";
         code += "<<EOF>>    return 'EOF'\n";
         code += "/lex\n";
 
-        code += "\t%start "+this.iniciador.replace(/%_/g,"")+"\n";
+        code += "\t%start "+this.iniciador.replace(/%_/g," NT")+"\n";
         code+= "\t%%\n"
         for(var index=0; index<this.noterminales.length; index++){
             //Hero goes the production
-            code += this.noterminales[index].getProduction().replace(/%_/g,"")+"\n \t:"
+            var tittleProduction = this.noterminales[index].getProduction().replace(/%_/g," NT")
+            code += tittleProduction +"\n \t:"
             var helperCode = this.noterminales[index].getRules();
             for(var indexCode=0; indexCode<helperCode.length; indexCode++){
                 //Hero goes the rules
-                var lexeme = helperCode[indexCode].replace("|","").replace(/%_/g,"").replace(/\$_/g,"")
+                var lexeme = helperCode[indexCode].replace("|","").replace(/%_/g," NT").replace(/\$_/g," T")
                 if(indexCode==0){
-                    code += lexeme + "\n"
+                    code += lexeme 
+                    
                 }else{
-                    code += "| " + lexeme + "\n"
+                    code += "| " + lexeme
                 }
+                code += "      {console.log(\""+tittleProduction.replace("NT","%_")+"\"); "
+                var lexemeAux = lexeme.split(" ")
+                console.log("LEXEMA: \'"+lexeme+"\' size: "+lexemeAux.length)
+                var contadora = 0
+                for(var indexLexeme=0; indexLexeme<lexemeAux.length; indexLexeme++){
+                    if(lexemeAux[indexLexeme].localeCompare("")!=0){ 
+                        if(lexemeAux[indexLexeme].charAt(0) == 'T'){
+                            code += "console.log($"+(contadora+1)+"); stack.push($"+(contadora+1)+");"
+                            contadora++
+                        }else if(lexemeAux[indexLexeme].charAt(0) == 'N'){
+                            code += "console.log(\""+lexemeAux[indexLexeme].replace("NT","%_")+"\"); stack.push(\""+lexemeAux[indexLexeme].replace("NT","%_")+"\");"
+                            contadora++
+                        }
+                    }
+                }
+                code += "addCode(\""+tittleProduction.replace("NT","%_").replace(" ","")+"\");"
+                code += "}\n"
             }
             code += "\t;\n"
         }
-
+        code += "%%\n"
+        code += "var contadora=0\n"
+        code += "var stack = new Array()\n"
+        code += "var codigo = \"\"\n"
+        code += "var listaDummy = new Array()\n"
+        code += "function addCode(name){\n"
+        code += "for(var index=0; index<stack.length; index++){\n"
+        code += "\tcodigo += (contadora+1)+\".-\"+name+\" -> \"+contadora+\".-\"+stack[index]+\";\\n\";\n"
+        code += "\t console.log(\"CODIGO AGREGADO: \"+codigo)\n"
+        code += "}\n"
+        code += "generatedCodeFull = codigo\n"
+        code += "contadora++;\n"
+        code += "stack = new Array();\n"
+        code += "listaDummy = new Array(); \n"
+        code += "listaDummy.push(codigo)\n"
+        code += "}\n"
+        console.warn("CODIGO: "+code)
         return code
     }
 

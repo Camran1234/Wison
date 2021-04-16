@@ -1,6 +1,6 @@
-import { Component, OnInit, Renderer2, ViewChild,ElementRef } from '@angular/core';
+import { Component, OnInit, Renderer2, ViewChild,ElementRef, ɵgetDebugNode__POST_R3__ } from '@angular/core';
 import * as parserWison from '../assets/parser/Wison.js';
-
+import { graphviz }  from 'd3-graphviz';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -40,14 +40,21 @@ import * as parserWison from '../assets/parser/Wison.js';
   ngOnInit() {
     }
 
-  parseGrammar(){
+  async parseGrammar(){
     var parseName = this.parserName
     var entry = this.entry
     var re = parserWison.parser.returnTable()
-    var answer = re.parseEntry(entry,parseName)
+    var answer = await re.parseEntry(entry,parseName)
     this.outPutParser = answer
+    var code = re.getTree()
+    console.log("RE: "+code)
+    
+      //graphviz("#tree").renderDot(code);
+    
   }
 
+
+  
   parseWinson(){
     try {
       this.outPut = "";
@@ -114,3 +121,7 @@ import * as parserWison from '../assets/parser/Wison.js';
 
    
 }
+function d3() {
+  throw new Error('Function not implemented.');
+}
+

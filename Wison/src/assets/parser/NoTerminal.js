@@ -20,17 +20,14 @@ export default class NoTerminal {
     //Retorna verdadero si es recursiva por la izquierda
     //Retorna falso si no es recursiva por la izquierda
     checkLeftRecursion(){
-        if(this.rules.length>1){
             var size;
             for(size=0; size<this.rules.length; size++){
                 var rule = this.rules[size].toString()
                 var res = rule.split(" ")
                 if(res[0].localeCompare(this.production)==0){
-                    
                     return true
                 }
             }
-        }
         return false
     }
 
