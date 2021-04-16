@@ -1,0 +1,51 @@
+<h1 style="text-align: center;" >WISON</h1>
+
+
+<main style="padding-left: 20%; padding-right: 20%;"> 
+  <h2  style="background-color:DodgerBlue" >Input Wison:</h2>
+  <div class="container">
+    <div class="example-button-row">
+      <label for="formFile" class="open">ABRIR</label>
+      <input type="file" id='formFile' (change)="fileUpload($event)" hidden>
+      <button  mat-raised-button color="accent" (click)="parseWinson()" >Run</button>
+    </div>
+  <label for='nameParser' class=warning>NOMBRE: </label>
+      <input type="textarea" [(ngModel)]="nameFile" required>
+      <br><br>
+      <div class="modal-dialog" >
+        <label class="lineIndicator"for="text" >{{line}}</label>
+      </div>
+      <br>
+      <textarea style="background-color: white;outline-style: solid;outline-color: black; outline-width: 5px;" matInput id="text" #myTextArea (click)="getLineNumberAndColumnIndex(myTextArea)"  (keyup)="getLineNumberAndColumnIndex(myTextArea)"   cols="100" rows="20" [(ngModel)]="text"></textarea>
+    <br><br>
+    <h2  style="background-color:DodgerBlue">OutPut</h2>
+    <textarea style="background-color: white;outline-style: solid;outline-color: black; outline-width: 5px;" id="newText" matInput cols="100" rows="10" disabled>{{outPut}}</textarea>
+  </div>
+  <br><br>
+  <h2 style="background-color:DodgerBlue">PARSERS</h2>
+
+  <div class="container">
+    <!--This is the comboBox, Get the value as -->
+    <mat-form-field style="background-color: white; ">
+      <mat-label >Selecciona tu Parser</mat-label>
+      <mat-select  [(value)]="parserName">
+        <mat-option *ngFor="let String of files" [value]="String">
+          {{String}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field> 
+    <br><br>
+    <label class="lineIndicator"for="parser" >{{lineParser}}</label>
+    <br><br>
+    <textarea id="parser" style="background-color: white;outline-style: solid;outline-color: black; outline-width: 5px;" matInput id="text" #parserArea (click)="getLineNumberAndColumnParser(parserArea)"  (keyup)="getLineNumberAndColumnParser(parserArea)"   cols="100" rows="20" [(ngModel)]="entry"></textarea>
+    
+    <br><br>
+    <button mat-raised-button color="primary" style="text-align: center;" (click)="parseGrammar()">DEBUG</button>
+  </div>
+  <br><br>
+  <h2  style="background-color:DodgerBlue">RESULTADO</h2>
+  <textarea style="background-color: white;outline-style: solid;outline-color: black; outline-width: 5px;" id="newText" matInput cols="100" rows="10" disabled>{{outPutParser}}</textarea>
+  <br><br><br>
+  <div id="tree" ></div>
+</main>
+

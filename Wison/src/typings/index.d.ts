@@ -1,0 +1,1 @@
+declare var parserWison:any;
